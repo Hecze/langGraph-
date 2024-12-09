@@ -10,7 +10,6 @@ from typing import Annotated, Literal, TypedDict
 from langchain_core.documents import Document
 from langchain_core.messages import AnyMessage
 from langgraph.graph import add_messages
-from shared.state import reduce_docs
 
 
 # Optional, the InputState is a restricted version of the State that is used to
@@ -61,7 +60,7 @@ class Router(TypedDict):
     """Classify user query."""
 
     logic: str
-    type: Literal["respond_to_technical_query", "ask_for_more_info", "respond_to_general_query", "respond_to_question_with_same_context"]
+    type: Literal["technical_retriever", "ask_for_more_info", "semantic_search", "respond_to_question_with_same_context"]
 
 
 # This is the primary state of your agent, where you can store any information
@@ -71,12 +70,8 @@ class Router(TypedDict):
 class AgentState(InputState):
     """State of the retrieval graph / agent."""
 
-    router: Router = field(default_factory=lambda: Router(type="general", logic=""))
+    router: Router = field(default_factory=lambda: Router(type="", logic=""))
     """The router's classification of the user's query."""
-    steps: list[str] = field(default_factory=list)
-    """A list of steps in the research plan."""
-    documents: Annotated[list[Document], reduce_docs] = field(default_factory=list)
-    """Populated by the retriever. This is a list of documents that the agent can reference."""
 
     # Feel free to add additional attributes to your state as needed.
     # Common examples include retrieved documents, extracted entities, API connections, etc.
